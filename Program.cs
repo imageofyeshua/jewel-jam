@@ -1,2 +1,2 @@
-﻿using var game = new JewelJam.JewelJam();
+﻿using var game = new JewelJam();
 game.Run();
