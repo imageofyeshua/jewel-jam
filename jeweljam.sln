@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jeweljam", "jeweljam.csproj", "{0FC9CBB3-0203-93EB-796E-355DF00BBCBA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0FC9CBB3-0203-93EB-796E-355DF00BBCBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FC9CBB3-0203-93EB-796E-355DF00BBCBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FC9CBB3-0203-93EB-796E-355DF00BBCBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC9CBB3-0203-93EB-796E-355DF00BBCBA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2093888C-A93D-4E23-BDC5-21C6B779A6BE}
+	EndGlobalSection
+EndGlobal
