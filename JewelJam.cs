@@ -152,7 +152,24 @@ public class JewelJam : Game
 
         if (inputHelper.KeyPressed(Keys.F5))
             FullScreen = !FullScreen;
+
+        if (inputHelper.KeyPressed(Keys.Space))
+            MoveRowsDown();
         base.Update(gameTime);
+    }
+
+    void MoveRowsDown()
+    {
+        for (int y = GridHeight - 1; y > 0; y--)
+        {
+            for (int x = 0; x < GridWidth; x++)
+            {
+                grid[x, y] = grid[x, y - 1];
+            }
+        }
+
+        for (int x = 0; x < GridWidth; x++)
+            grid[x, 0] = random.Next(3);
     }
 
     protected override void Draw(GameTime gameTime)
