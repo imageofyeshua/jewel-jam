@@ -103,6 +103,9 @@ public class JewelJam : Game
         // load the background sprite
         background = Content.Load<Texture2D>("spr_background");
 
+        // load the cursor sprite
+        cursorSprite = Content.Load<Texture2D>("spr_single_jewel1");
+
         // set the world size to the width and height of that sprite
         worldSize = new Point(background.Width, background.Height);
 
@@ -125,11 +128,15 @@ public class JewelJam : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(Color.Black);
 
+        // start drawing sprites, applying the scaling matrix
         _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, spriteScale);
 
+        // draw the background sprite
         _spriteBatch.Draw(background, Vector2.Zero, Color.White);
+
+        _spriteBatch.Draw(cursorSprite, ScreenToWorld(inputHelper.MousePosition), Color.White);
 
         _spriteBatch.End();
 
@@ -140,5 +147,12 @@ public class JewelJam : Game
     {
         get { return _graphics.IsFullScreen; }
         set { ApplyResolutionSettings(value); }
+    }
+
+    Vector2 ScreenToWorld(Vector2 screenPosition)
+    {
+        Vector2 viewportTopLeft = new Vector2(GraphicsDevice.Viewport.X, GraphicsDevice.Viewport.Y);
+        float screenToWorldScale = worldSize.X / (float)GraphicsDevice.Viewport.Width;
+        return (screenPosition - viewportTopLeft) * screenToWorldScale;
     }
 }
