@@ -13,6 +13,9 @@ public class JewelJam : Game
     // the background sprite
     protected Texture2D background;
 
+    // a sprite to draw at the mouse position, as an example of using ScreenToWorld
+    protected Texture2D cursorSprite;
+
     // gameword, and window size structs storing two integers
     Point worldSize, windowSize;
 
@@ -42,7 +45,7 @@ public class JewelJam : Game
         // make the game full screen or not
         _graphics.IsFullScreen = fullScreen;
 
-        // get the size of the screen to use
+        // get the size of the screen to use: either the window size or the full screen size
         Point screenSize;
         if (fullScreen)
             screenSize = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
@@ -56,8 +59,41 @@ public class JewelJam : Game
 
         _graphics.ApplyChanges();
 
+        // calculate and set the viewport to use
+        GraphicsDevice.Viewport = CalculateViewport(screenSize);
+
         // calculate how the graphics should be scaled, so that the game world fits inside the window
-        spriteScale = Matrix.CreateScale((float)screenSize.X / worldSize.X, (float)screenSize.Y / worldSize.Y, 1);
+        spriteScale = Matrix.CreateScale((float)GraphicsDevice.Viewport.Width / worldSize.X,
+            (float)GraphicsDevice.Viewport.Height / worldSize.Y, 1);
+    }
+
+    Viewport CalculateViewport(Point windowSize)
+    {
+        // create a viewport object
+        Viewport viewport = new Viewport();
+
+        // calculate the two aspect ratios
+        float gameAspectRatio = (float)worldSize.X / worldSize.Y;
+        float windowAspectRatio = (float)windowSize.X / windowSize.Y;
+
+        // if the window is relatively wide, use the full window height
+        if (windowAspectRatio > gameAspectRatio)
+        {
+            viewport.Width = (int)(windowSize.Y * gameAspectRatio);
+            viewport.Height = windowSize.Y;
+        }
+        // if the window is relatively high, use the full window width
+        else
+        {
+            viewport.Width = windowSize.X;
+            viewport.Height = (int)(windowSize.X / gameAspectRatio);
+        }
+
+        // calculate and store the top-left corner of the viewport
+        viewport.X = (windowSize.X - viewport.Width) / 2;
+        viewport.Y = (windowSize.Y - viewport.Height) / 2;
+
+        return viewport;
     }
 
     protected override void LoadContent()
