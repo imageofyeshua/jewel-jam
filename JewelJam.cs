@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -6,6 +7,23 @@ public class JewelJam : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
+
+    // grid width and height
+    int[,] grid;
+    const int GridWidth = 5;
+    const int GridHeight = 10;
+
+    // the horizontal and distance between two adjacent grid cells
+    const int CellSize = 85;
+
+    // the position of the top-left corner of the grid in the game world
+    Vector2 GridOffset = new Vector2(85, 150);
+
+    // an object for generating random numbers
+    static Random random;
+
+    // the different sprites for jewels
+    Texture2D[] jewels;
 
     // a matrix used for scaling the gameworld so that it fits inside the window
     Matrix spriteScale;
@@ -22,15 +40,23 @@ public class JewelJam : Game
     // user input helper
     InputHelper inputHelper;
 
-    // full screen or not
-    bool fullScreen;
-
     public JewelJam()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         inputHelper = new InputHelper();
+        random = new Random();
+
+        // initialize the grid with random jewels
+        grid = new int[GridWidth, GridHeight];
+        for (int x = 0; x < GridWidth; x++)
+        {
+            for (int y = 0; y < GridHeight; y++)
+            {
+                grid[x, y] = random.Next(3);
+            }
+        }
     }
 
     protected override void Initialize()
@@ -103,8 +129,11 @@ public class JewelJam : Game
         // load the background sprite
         background = Content.Load<Texture2D>("spr_background");
 
-        // load the cursor sprite
-        cursorSprite = Content.Load<Texture2D>("spr_single_jewel1");
+        // load the jewel sprites
+        jewels = new Texture2D[3];
+        jewels[0] = Content.Load<Texture2D>("spr_single_jewel1");
+        jewels[1] = Content.Load<Texture2D>("spr_single_jewel2");
+        jewels[2] = Content.Load<Texture2D>("spr_single_jewel3");
 
         // set the world size to the width and height of that sprite
         worldSize = new Point(background.Width, background.Height);
@@ -136,7 +165,19 @@ public class JewelJam : Game
         // draw the background sprite
         _spriteBatch.Draw(background, Vector2.Zero, Color.White);
 
-        _spriteBatch.Draw(cursorSprite, ScreenToWorld(inputHelper.MousePosition), Color.White);
+        // draw all jewels: one per grid cell
+        for (int x = 0; x < GridWidth; x++)
+        {
+            for (int y = 0; y < GridHeight; y++)
+            {
+                // compute the world position for this grid cell
+                Vector2 position = GridOffset + new Vector2(x, y) * CellSize;
+
+                // the grid stores a number; draw the sprite associated to that number
+                int jewelIndex = grid[x, y];
+                _spriteBatch.Draw(jewels[jewelIndex], position, Color.White);
+            }
+        }
 
         _spriteBatch.End();
 
