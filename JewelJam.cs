@@ -3,50 +3,49 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-public class JewelJam : Game
+public class JewelJam : ExtendedGame
 {
-    private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
-
-    // grid width and height
-    int[,] grid;
-    const int GridWidth = 5;
-    const int GridHeight = 10;
-
-    // the horizontal and distance between two adjacent grid cells
-    const int CellSize = 85;
-
-    // the position of the top-left corner of the grid in the game world
-    Vector2 GridOffset = new Vector2(85, 150);
-
-    // an object for generating random numbers
-    static Random random;
+    // the background sprite
+    Texture2D background;
 
     // the different sprites for jewels
     Texture2D[] jewels;
 
-    // a matrix used for scaling the gameworld so that it fits inside the window
-    Matrix spriteScale;
+    /// <summary>
+    /// The grid of jewels, where each distinct integer value stands for a different jewel.
+    /// </summary>
+    int[,] grid;
 
-    // the background sprite
-    protected Texture2D background;
+    /// <summary>
+    /// The width of the grid: the number of cells in the horizontal direction.
+    /// </summary>
+    const int GridWidth = 5;
 
-    // a sprite to draw at the mouse position, as an example of using ScreenToWorld
-    protected Texture2D cursorSprite;
+    /// <summary>
+    /// The height of the grid: the number of cells in the vertical direction.
+    /// </summary>
+    const int GridHeight = 10;
 
-    // gameword, and window size structs storing two integers
-    Point worldSize, windowSize;
+    /// <summary>
+    /// The horizontal and distance between two adjacent grid cells.
+    /// </summary>
+    const int CellSize = 85;
 
-    // user input helper
-    InputHelper inputHelper;
+    /// <summary>
+    /// The position of the top-left corner of the grid in the game world.
+    /// </summary>
+    Vector2 GridOffset = new Vector2(85, 150);
+
+    [STAThread]
+    static void Main()
+    {
+        JewelJam game = new JewelJam();
+        game.Run();
+    }
 
     public JewelJam()
     {
-        _graphics = new GraphicsDeviceManager(this);
-        Content.RootDirectory = "Content";
         IsMouseVisible = true;
-        inputHelper = new InputHelper();
-        random = new Random();
 
         // initialize the grid with random jewels
         grid = new int[GridWidth, GridHeight];
@@ -54,77 +53,14 @@ public class JewelJam : Game
         {
             for (int y = 0; y < GridHeight; y++)
             {
-                grid[x, y] = random.Next(3);
+                grid[x, y] = Random.Next(3);
             }
         }
     }
 
-    protected override void Initialize()
-    {
-        // TODO: Add your initialization logic here
-
-        base.Initialize();
-    }
-
-    void ApplyResolutionSettings(bool fullScreen)
-    {
-        // make the game full screen or not
-        _graphics.IsFullScreen = fullScreen;
-
-        // get the size of the screen to use: either the window size or the full screen size
-        Point screenSize;
-        if (fullScreen)
-            screenSize = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
-                GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
-        else
-            screenSize = windowSize;
-
-        // scale the window to the desired size
-        _graphics.PreferredBackBufferWidth = screenSize.X;
-        _graphics.PreferredBackBufferHeight = screenSize.Y;
-
-        _graphics.ApplyChanges();
-
-        // calculate and set the viewport to use
-        GraphicsDevice.Viewport = CalculateViewport(screenSize);
-
-        // calculate how the graphics should be scaled, so that the game world fits inside the window
-        spriteScale = Matrix.CreateScale((float)GraphicsDevice.Viewport.Width / worldSize.X,
-            (float)GraphicsDevice.Viewport.Height / worldSize.Y, 1);
-    }
-
-    Viewport CalculateViewport(Point windowSize)
-    {
-        // create a viewport object
-        Viewport viewport = new Viewport();
-
-        // calculate the two aspect ratios
-        float gameAspectRatio = (float)worldSize.X / worldSize.Y;
-        float windowAspectRatio = (float)windowSize.X / windowSize.Y;
-
-        // if the window is relatively wide, use the full window height
-        if (windowAspectRatio > gameAspectRatio)
-        {
-            viewport.Width = (int)(windowSize.Y * gameAspectRatio);
-            viewport.Height = windowSize.Y;
-        }
-        // if the window is relatively high, use the full window width
-        else
-        {
-            viewport.Width = windowSize.X;
-            viewport.Height = (int)(windowSize.X / gameAspectRatio);
-        }
-
-        // calculate and store the top-left corner of the viewport
-        viewport.X = (windowSize.X - viewport.Width) / 2;
-        viewport.Y = (windowSize.Y - viewport.Height) / 2;
-
-        return viewport;
-    }
-
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        base.LoadContent();
 
         // load the background sprite
         background = Content.Load<Texture2D>("spr_background");
@@ -135,41 +71,18 @@ public class JewelJam : Game
         jewels[1] = Content.Load<Texture2D>("spr_single_jewel2");
         jewels[2] = Content.Load<Texture2D>("spr_single_jewel3");
 
-        // set the world size to the width and height of that sprite
+        // calculate the world size, and recalculate how the world should be scaled
         worldSize = new Point(background.Width, background.Height);
-
-        // set the window size
-        windowSize = new Point(1024, 768);
         FullScreen = false;
     }
 
-    protected override void Update(GameTime gameTime)
+    protected override void HandleInput()
     {
-        inputHelper.Update();
+        base.HandleInput();
 
-        if (inputHelper.KeyPressed(Keys.Escape))
-            Exit();
-
-        if (inputHelper.KeyPressed(Keys.F5))
-            FullScreen = !FullScreen;
-
+        // when the player presses the spacebar, move all jewels one row down
         if (inputHelper.KeyPressed(Keys.Space))
             MoveRowsDown();
-        base.Update(gameTime);
-    }
-
-    void MoveRowsDown()
-    {
-        for (int y = GridHeight - 1; y > 0; y--)
-        {
-            for (int x = 0; x < GridWidth; x++)
-            {
-                grid[x, y] = grid[x, y - 1];
-            }
-        }
-
-        for (int x = 0; x < GridWidth; x++)
-            grid[x, 0] = random.Next(3);
     }
 
     protected override void Draw(GameTime gameTime)
@@ -177,10 +90,10 @@ public class JewelJam : Game
         GraphicsDevice.Clear(Color.Black);
 
         // start drawing sprites, applying the scaling matrix
-        _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, spriteScale);
+        spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, spriteScale);
 
         // draw the background sprite
-        _spriteBatch.Draw(background, Vector2.Zero, Color.White);
+        spriteBatch.Draw(background, Vector2.Zero, Color.White);
 
         // draw all jewels: one per grid cell
         for (int x = 0; x < GridWidth; x++)
@@ -192,25 +105,29 @@ public class JewelJam : Game
 
                 // the grid stores a number; draw the sprite associated to that number
                 int jewelIndex = grid[x, y];
-                _spriteBatch.Draw(jewels[jewelIndex], position, Color.White);
+                spriteBatch.Draw(jewels[jewelIndex], position, Color.White);
+            }
+        }
+        spriteBatch.End();
+    }
+
+    /// <summary>
+    /// Moves all jewels one row down, and then refills the top row of the grid with new random jewels.
+    /// </summary>
+    void MoveRowsDown()
+    {
+        for (int y = GridHeight - 1; y > 0; y--)
+        {
+            for (int x = 0; x < GridWidth; x++)
+            {
+                grid[x, y] = grid[x, y - 1];
             }
         }
 
-        _spriteBatch.End();
-
-        base.Draw(gameTime);
-    }
-
-    bool FullScreen
-    {
-        get { return _graphics.IsFullScreen; }
-        set { ApplyResolutionSettings(value); }
-    }
-
-    Vector2 ScreenToWorld(Vector2 screenPosition)
-    {
-        Vector2 viewportTopLeft = new Vector2(GraphicsDevice.Viewport.X, GraphicsDevice.Viewport.Y);
-        float screenToWorldScale = worldSize.X / (float)GraphicsDevice.Viewport.Width;
-        return (screenPosition - viewportTopLeft) * screenToWorldScale;
+        // refill the top row
+        for (int x = 0; x < GridWidth; x++)
+        {
+            grid[x, 0] = Random.Next(3);
+        }
     }
 }
